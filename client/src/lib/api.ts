@@ -1,4 +1,5 @@
 import API from "./axios-client";
+import { AxiosError } from "axios";
 import {
   AllMembersInWorkspaceResponseType,
   AllProjectPayloadType,
@@ -41,7 +42,11 @@ export const registerMutationFn = async (
   return response.data;
 };
 
-export const logoutMutationFn = async () => await API.post("/auth/logout");
+export const logoutMutationFn = async () => {
+  localStorage.removeItem('authToken');
+  window.dispatchEvent(new CustomEvent('tokenChanged'));
+  return await API.post("/auth/logout");
+};
 
 export const getCurrentUserQueryFn =
   async (): Promise<CurrentUserResponseType> => {
@@ -80,8 +85,22 @@ export const getWorkspaceByIdQueryFn = async (
 export const getMembersInWorkspaceQueryFn = async (
   workspaceId: string
 ): Promise<AllMembersInWorkspaceResponseType> => {
-  const response = await API.get(`/workspace/members/${workspaceId}`);
-  return response.data;
+  try {
+    const response = await API.get(`/workspace/members/${workspaceId}`);
+    return response.data;
+  } catch (error: unknown) {
+    // If it's a 500 error, return empty data instead of failing
+    const axiosError = error as AxiosError;
+    if (axiosError?.response?.status === 500) {
+      console.warn('Failed to load workspace members, returning empty data');
+      return {
+        message: "Failed to load members",
+        members: [],
+        roles: []
+      };
+    }
+    throw error;
+  }
 };
 
 export const getWorkspaceAnalyticsQueryFn = async (

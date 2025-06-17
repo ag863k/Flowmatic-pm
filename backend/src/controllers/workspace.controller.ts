@@ -69,19 +69,59 @@ export const getWorkspaceByIdController = asyncHandler(
 
 export const getWorkspaceMembersController = asyncHandler(
   async (req: Request, res: Response) => {
-    const workspaceId = workspaceIdSchema.parse(req.params.id);
-    const userId = req.user?._id;
+    try {
+      const workspaceId = workspaceIdSchema.parse(req.params.id);
+      const userId = req.user?._id;
 
-    const { role } = await getMemberRoleInWorkspace(userId, workspaceId);
-    roleGuard(role, [Permissions.VIEW_ONLY]);
+      if (!userId) {
+        return res.status(HTTPSTATUS.UNAUTHORIZED).json({
+          message: "User not authenticated",
+          errorCode: "ACCESS_UNAUTHORIZED"
+        });
+      }
 
-    const { members, roles } = await getWorkspaceMembersService(workspaceId);
+      // Check if user is a member and get their role
+      const { role } = await getMemberRoleInWorkspace(userId, workspaceId);
+      roleGuard(role, [Permissions.VIEW_ONLY]);
 
-    return res.status(HTTPSTATUS.OK).json({
-      message: "Workspace members retrieved successfully",
-      members,
-      roles,
-    });
+      // Get workspace members
+      const { members, roles } = await getWorkspaceMembersService(workspaceId);
+
+      return res.status(HTTPSTATUS.OK).json({
+        message: "Workspace members retrieved successfully",
+        members: members || [],
+        roles: roles || [],
+      });
+    } catch (error: any) {
+      console.error('Error in getWorkspaceMembersController:', error);
+      
+      if (error.message?.includes("not a member") || error.message?.includes("ACCESS_UNAUTHORIZED")) {
+        return res.status(HTTPSTATUS.FORBIDDEN).json({
+          message: "You are not a member of this workspace",
+          errorCode: "ACCESS_UNAUTHORIZED"
+        });
+      }
+      
+      if (error.message?.includes("not found")) {
+        return res.status(HTTPSTATUS.NOT_FOUND).json({
+          message: "Workspace not found",
+          errorCode: "WORKSPACE_NOT_FOUND"
+        });
+      }
+      
+      if (error.message?.includes("Invalid")) {
+        return res.status(HTTPSTATUS.BAD_REQUEST).json({
+          message: "Invalid request parameters",
+          errorCode: "INVALID_PARAMETERS"
+        });
+      }
+
+      // For any other errors, return 500
+      return res.status(HTTPSTATUS.INTERNAL_SERVER_ERROR).json({
+        message: "Internal server error",
+        errorCode: "INTERNAL_ERROR"
+      });
+    }
   }
 );
 

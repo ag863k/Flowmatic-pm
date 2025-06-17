@@ -9,21 +9,23 @@ import CreateProjectDialog from "@/components/workspace/project/create-project-d
 const AppLayout = () => {
   return (
     <AuthProvider>
-      <SidebarProvider>
-        <Asidebar />
-        <SidebarInset className="overflow-x-hidden">
-          <div className="w-full">
-            <>
-              <Header />
-              <div className="px-3 lg:px-20 py-3">
-                <Outlet />
-              </div>
-            </>
-            <CreateWorkspaceDialog />
-            <CreateProjectDialog />
-          </div>
-        </SidebarInset>
-      </SidebarProvider>
+      <div className="gradient-bg-fixed min-h-screen">
+        <SidebarProvider>
+          <Asidebar />
+          <SidebarInset className="overflow-x-hidden">
+            <div className="w-full">
+              <>
+                <Header />
+                <div className="px-3 lg:px-20 py-3">
+                  <Outlet />
+                </div>
+              </>
+              <CreateWorkspaceDialog />
+              <CreateProjectDialog />
+            </div>
+          </SidebarInset>
+        </SidebarProvider>
+      </div>
     </AuthProvider>
   );
 };

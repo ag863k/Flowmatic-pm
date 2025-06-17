@@ -11,6 +11,7 @@ export type LoginResponseType = {
     _id: string;
     currentWorkspace: string;
   };
+  token?: string;
 };
 
 export type registerType = {
@@ -23,6 +24,7 @@ export type RegisterResponseType = {
   message: string;
   user: UserType;
   workspaceId: string;
+  token?: string;
 };
 
 // USER TYPE

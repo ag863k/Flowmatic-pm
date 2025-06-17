@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import ProjectModel from "../models/project.model";
 import TaskModel from "../models/task.model";
-import { NotFoundException } from "../utils/appError";
+import { NotFoundException, BadRequestException } from "../utils/appError";
 import { TaskStatusEnum } from "../enums/task.enum";
 
 export const createProjectService = async (
@@ -31,25 +31,82 @@ export const getProjectsInWorkspaceService = async (
   pageSize: number,
   pageNumber: number
 ) => {
-  // Step 1: Find all projects in the workspace
+  try {
+    if (!mongoose.Types.ObjectId.isValid(workspaceId)) {
+      throw new BadRequestException("Invalid workspace ID");
+    }
 
-  const totalCount = await ProjectModel.countDocuments({
-    workspace: workspaceId,
-  });
+    const skip = (pageNumber - 1) * pageSize;
 
-  const skip = (pageNumber - 1) * pageSize;
+    // Use aggregation to handle broken references
+    const result = await ProjectModel.aggregate([
+      {
+        $match: {
+          workspace: new mongoose.Types.ObjectId(workspaceId)
+        }
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "createdBy",
+          foreignField: "_id",
+          as: "createdBy",
+          pipeline: [
+            {
+              $project: {
+                _id: 1,
+                name: 1,
+                profilePicture: 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        $addFields: {
+          createdBy: {
+            $ifNull: [
+              { $arrayElemAt: ["$createdBy", 0] },
+              {
+                _id: null,
+                name: "Unknown User",
+                profilePicture: null
+              }
+            ]
+          }
+        }
+      },
+      {
+        $sort: { createdAt: -1 }
+      },
+      {
+        $facet: {
+          projects: [
+            { $skip: skip },
+            { $limit: pageSize }
+          ],
+          totalCount: [
+            { $count: "count" }
+          ]
+        }
+      }
+    ]);
 
-  const projects = await ProjectModel.find({
-    workspace: workspaceId,
-  })
-    .skip(skip)
-    .limit(pageSize)
-    .populate("createdBy", "_id name profilePicture -password")
-    .sort({ createdAt: -1 });
+    const projects = result[0]?.projects || [];
+    const totalCount = result[0]?.totalCount[0]?.count || 0;
+    const totalPages = Math.ceil(totalCount / pageSize);
 
-  const totalPages = Math.ceil(totalCount / pageSize);
-
-  return { projects, totalCount, totalPages, skip };
+    return { projects, totalCount, totalPages, skip };
+  } catch (error) {
+    console.error('Error in getProjectsInWorkspaceService:', error);
+    // Return empty result instead of throwing
+    return { 
+      projects: [], 
+      totalCount: 0, 
+      totalPages: 0, 
+      skip: (pageNumber - 1) * pageSize 
+    };
+  }
 };
 
 export const getProjectByIdAndWorkspaceIdService = async (

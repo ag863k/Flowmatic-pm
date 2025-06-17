@@ -44,6 +44,7 @@ em-emoji-picker {
 @layer base {
   :root {
     --background: 0 0% 100%;
+    --background-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 
     --foreground: 0 0% 3.9%;
 
@@ -111,6 +112,7 @@ em-emoji-picker {
   }
   .dark {
     --background: 0 0% 3.9%;
+    --background-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 25%, #0f3460 50%, #16213e 75%, #1a1a2e 100%);
 
     --foreground: 0 0% 98%;
 
@@ -181,10 +183,22 @@ em-emoji-picker {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: var(--background-gradient);
+    min-height: 100vh;
   }
 
   button[data-placeholder] {
     @apply text-muted-foreground;
   }
+}
+
+/* Custom gradient backgrounds */
+.gradient-bg {
+  background: var(--background-gradient);
+}
+
+.gradient-bg-fixed {
+  background: var(--background-gradient);
+  background-attachment: fixed;
 }

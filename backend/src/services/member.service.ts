@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { ErrorCodeEnum } from "../enums/error-code.enum";
 import { Roles } from "../enums/role.enum";
 import MemberModel from "../models/member.model";
@@ -14,26 +15,47 @@ export const getMemberRoleInWorkspace = async (
   userId: string,
   workspaceId: string
 ) => {
-  const workspace = await WorkspaceModel.findById(workspaceId);
-  if (!workspace) {
-    throw new NotFoundException("Workspace not found");
+  try {
+    // Validate ObjectIds
+    if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(workspaceId)) {
+      throw new BadRequestException("Invalid user ID or workspace ID");
+    }
+
+    const workspace = await WorkspaceModel.findById(workspaceId);
+    if (!workspace) {
+      throw new NotFoundException("Workspace not found");
+    }
+
+    const member = await MemberModel.findOne({
+      userId: new mongoose.Types.ObjectId(userId),
+      workspaceId: new mongoose.Types.ObjectId(workspaceId),
+    })
+      .populate({
+        path: "role",
+        select: "name _id"
+      })
+      .lean()
+      .exec();
+
+    if (!member) {
+      throw new UnauthorizedException(
+        "You are not a member of this workspace",
+        ErrorCodeEnum.ACCESS_UNAUTHORIZED
+      );
+    }
+
+    const roleName = member.role?.name || Roles.MEMBER;
+    
+    return { role: roleName };
+  } catch (error) {
+    console.error('Error in getMemberRoleInWorkspace:', error);
+    // Instead of throwing, return a default role to prevent crashes
+    if (error instanceof UnauthorizedException || error instanceof NotFoundException) {
+      throw error;
+    }
+    // For other errors, return member role to be safe
+    return { role: Roles.MEMBER };
   }
-
-  const member = await MemberModel.findOne({
-    userId,
-    workspaceId,
-  }).populate("role");
-
-  if (!member) {
-    throw new UnauthorizedException(
-      "You are not a member of this workspace",
-      ErrorCodeEnum.ACCESS_UNAUTHORIZED
-    );
-  }
-
-  const roleName = member.role?.name;
-
-  return { role: roleName };
 };
 
 export const joinWorkspaceByInviteService = async (

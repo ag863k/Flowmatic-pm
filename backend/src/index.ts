@@ -9,8 +9,7 @@ import { errorHandler } from "./middlewares/errorHandler.middleware";
 import { HTTPSTATUS } from "./config/http.config";
 import { asyncHandler } from "./middlewares/asyncHandler.middleware";
 
-// Import routes and JWT middleware
-import "./config/passport.config"; // For Google OAuth only
+import "./config/passport.config";
 import passport from "passport";
 import authRoutes from "./routes/auth.route";
 import userRoutes from "./routes/user.route";
@@ -25,12 +24,16 @@ const BASE_PATH = config.BASE_PATH;
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(cookieParser()); // Add cookie parser middleware
+app.use(cookieParser());
 
-// CORS configuration for cross-domain requests
 app.use(
   cors({
-    origin: "https://flowmatic-pm.netlify.app",
+    origin: [
+      "https://flowmatic-pm.netlify.app",
+      "http://localhost:5173", 
+      "http://localhost:3000",
+      "http://localhost:4173",
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: [
@@ -39,7 +42,8 @@ app.use(
       "X-Requested-With",
       "Accept",
       "Origin",
-      "Cache-Control"
+      "Cache-Control",
+      "Cookie"
     ],
     exposedHeaders: ["Set-Cookie"],
     optionsSuccessStatus: 200,
@@ -47,35 +51,49 @@ app.use(
   })
 );
 
-// Minimal session for Google OAuth only
 app.use(
   session({
     name: "oauth-session",
     keys: [config.SESSION_SECRET],
-    maxAge: 10 * 60 * 1000, // 10 minutes - just for OAuth flow
-    secure: config.NODE_ENV === 'production',
+    maxAge: 10 * 60 * 1000,
+    secure: true,
     httpOnly: true,
     sameSite: 'none',
     signed: true,
   })
 );
 
-// Passport for Google OAuth only
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'OK' });
 });
 
-// Debug endpoint to test JWT authentication
-app.get('/debug/auth', isAuthenticatedJWT, (req: Request, res: Response) => {
-  res.json({
-    message: 'JWT authentication working',
-    user: req.user,
-    cookies: req.headers.cookie
-  });
+app.get('/debug/workspace/:id/members', isAuthenticatedJWT, async (req: Request, res: Response) => {
+  try {
+    const workspaceId = req.params.id;
+    const userId = req.user?._id;
+    
+    const WorkspaceModel = require('./models/workspace.model').default;
+    const workspace = await WorkspaceModel.findById(workspaceId);
+    
+    const MemberModel = require('./models/member.model').default;
+    const member = await MemberModel.findOne({ userId, workspaceId });
+    
+    res.json({
+      workspaceId,
+      workspaceExists: !!workspace,
+      userIsMember: !!member,
+      userId,
+      member: member ? {
+        role: member.role,
+        joinedAt: member.joinedAt
+      } : null
+    });
+  } catch (error) {
+    res.status(500).json({ error: (error as Error).message });
+  }
 });
 
 // Handle preflight requests
@@ -114,7 +132,6 @@ const server = app.listen(config.PORT, async () => {
   }
 });
 
-// Graceful shutdown handling
 const gracefulShutdown = (signal: string) => {
   server.close(() => {
     process.exit(0);

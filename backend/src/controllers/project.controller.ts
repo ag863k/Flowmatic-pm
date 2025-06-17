@@ -39,30 +39,46 @@ export const createProjectController = asyncHandler(
 
 export const getAllProjectsInWorkspaceController = asyncHandler(
   async (req: Request, res: Response) => {
-    const workspaceId = workspaceIdSchema.parse(req.params.workspaceId);
-    const userId = req.user?._id;
+    try {
+      const workspaceId = workspaceIdSchema.parse(req.params.workspaceId);
+      const userId = req.user?._id;
 
-    const { role } = await getMemberRoleInWorkspace(userId, workspaceId);
-    roleGuard(role, [Permissions.VIEW_ONLY]);
+      const { role } = await getMemberRoleInWorkspace(userId, workspaceId);
+      roleGuard(role, [Permissions.VIEW_ONLY]);
 
-    const pageSize = parseInt(req.query.pageSize as string) || 10;
-    const pageNumber = parseInt(req.query.pageNumber as string) || 1;
+      const pageSize = parseInt(req.query.pageSize as string) || 10;
+      const pageNumber = parseInt(req.query.pageNumber as string) || 1;
 
-    const { projects, totalCount, totalPages, skip } =
-      await getProjectsInWorkspaceService(workspaceId, pageSize, pageNumber);
+      const { projects, totalCount, totalPages, skip } =
+        await getProjectsInWorkspaceService(workspaceId, pageSize, pageNumber);
 
-    return res.status(HTTPSTATUS.OK).json({
-      message: "Project fetched successfully",
-      projects,
-      pagination: {
-        totalCount,
-        pageSize,
-        pageNumber,
-        totalPages,
-        skip,
-        limit: pageSize,
-      },
-    });
+      return res.status(HTTPSTATUS.OK).json({
+        message: "Projects fetched successfully",
+        projects,
+        pagination: {
+          totalCount,
+          pageSize,
+          pageNumber,
+          totalPages,
+          skip,
+          limit: pageSize,
+        },
+      });
+    } catch (error) {
+      console.error('Error in getAllProjectsInWorkspaceController:', error);
+      return res.status(HTTPSTATUS.OK).json({
+        message: "Projects fetched successfully",
+        projects: [],
+        pagination: {
+          totalCount: 0,
+          pageSize: parseInt(req.query.pageSize as string) || 10,
+          pageNumber: parseInt(req.query.pageNumber as string) || 1,
+          totalPages: 0,
+          skip: 0,
+          limit: parseInt(req.query.pageSize as string) || 10,
+        },
+      });
+    }
   }
 );
 

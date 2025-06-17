@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import CreateTaskForm from "./create-task-form";
 
@@ -20,6 +21,12 @@ const CreateTaskDialog = (props: { projectId?: string }) => {
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-lg max-h-auto my-5 border-0">
+          <VisuallyHidden>
+            <DialogTitle>Create New Task</DialogTitle>
+            <DialogDescription>
+              Create a new task to track work items and manage progress.
+            </DialogDescription>
+          </VisuallyHidden>
           <CreateTaskForm projectId={props.projectId} onClose={onClose} />
         </DialogContent>
       </Dialog>

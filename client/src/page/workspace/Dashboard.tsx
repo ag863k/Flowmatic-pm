@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RecentProjects from "@/components/workspace/project/recent-projects";
 import RecentTasks from "@/components/workspace/task/recent-tasks";
 import RecentMembers from "@/components/workspace/member/recent-members";
+
 const WorkspaceDashboard = () => {
   const { onOpen } = useCreateProjectDialog();
   return (
@@ -25,6 +26,7 @@ const WorkspaceDashboard = () => {
           <span className="sm:inline">New Project</span>
         </Button>
       </div>
+      
       <WorkspaceAnalytics />
       <div className="mt-4">
         <Tabs defaultValue="projects" className="w-full border rounded-lg p-1 sm:p-2">

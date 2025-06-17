@@ -6,9 +6,16 @@ export const roleGuard = (
   role: keyof typeof RolePermissions,
   requiredPermissions: PermissionType[]
 ) => {
-  const permissions = RolePermissions[role];
-  // If the role doesn't exist or lacks required permissions, throw an exception
+  // Check if role exists
+  if (!role || !RolePermissions[role]) {
+    throw new UnauthorizedException(
+      "Invalid or missing role"
+    );
+  }
 
+  const permissions = RolePermissions[role];
+  
+  // If the role doesn't exist or lacks required permissions, throw an exception
   const hasPermission = requiredPermissions.every((permission) =>
     permissions.includes(permission)
   );

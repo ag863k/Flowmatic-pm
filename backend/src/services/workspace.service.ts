@@ -88,18 +88,51 @@ export const getWorkspaceByIdService = async (workspaceId: string) => {
 };
 
 export const getWorkspaceMembersService = async (workspaceId: string) => {
+  try {
+    // Validate workspaceId
+    if (!mongoose.Types.ObjectId.isValid(workspaceId)) {
+      throw new BadRequestException("Invalid workspace ID");
+    }
 
-  const members = await MemberModel.find({
-    workspaceId,
-  })
-    .populate("userId", "name email profilePicture -password")
-    .populate("role", "name");
+    // First check if workspace exists
+    const workspace = await WorkspaceModel.findById(workspaceId);
+    if (!workspace) {
+      throw new NotFoundException("Workspace not found");
+    }
 
-  const roles = await RoleModel.find({}, { name: 1, _id: 1 })
-    .select("-permission")
-    .lean();
+    // Get members with safe populate
+    const members = await MemberModel.find({
+      workspaceId: new mongoose.Types.ObjectId(workspaceId),
+    })
+      .populate({
+        path: "userId",
+        select: "name email profilePicture",
+        match: { isActive: { $ne: false } } // Only active users
+      })
+      .populate({
+        path: "role",
+        select: "name _id"
+      })
+      .lean()
+      .exec();
 
-  return { members, roles };
+    // Filter out members with null userId (deleted users)
+    const validMembers = members.filter(member => member.userId !== null);
+
+    // Get all roles
+    const roles = await RoleModel.find({}, { name: 1, _id: 1 })
+      .select("-permission")
+      .lean()
+      .exec();
+
+    return { 
+      members: validMembers, 
+      roles: roles || [] 
+    };
+  } catch (error) {
+    console.error('Error in getWorkspaceMembersService:', error);
+    throw error;
+  }
 };
 
 export const getWorkspaceAnalyticsService = async (workspaceId: string) => {

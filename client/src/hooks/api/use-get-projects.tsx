@@ -20,6 +20,7 @@ const useGetProjectsInWorkspaceQuery = ({
     placeholderData: skip ? undefined : keepPreviousData,
     enabled: !skip,
   });
+  
   return query;
 };
 

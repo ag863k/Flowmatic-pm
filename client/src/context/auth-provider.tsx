@@ -48,12 +48,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const workspace = workspaceData?.workspace;
 
   useEffect(() => {
-    if (workspaceError) {
-      if (workspaceError?.errorCode === "ACCESS_UNAUTHORIZED") {
-        navigate("/"); // Redirect if the user is not a member of the workspace
+    // Handle authentication errors - but don't redirect in infinite loop
+    if (authError && (authError as any)?.errorCode === "ACCESS_UNAUTHORIZED") {
+      // Only redirect if we're not already on auth pages
+      const currentPath = window.location.pathname;
+      if (!currentPath.includes('/sign-in') && !currentPath.includes('/sign-up') && currentPath !== '/') {
+        navigate("/", { replace: true });
       }
     }
-  }, [navigate, workspaceError]);
+    
+    if (workspaceError && workspaceError?.errorCode === "ACCESS_UNAUTHORIZED") {
+      // Only redirect if we're not already on auth pages
+      const currentPath = window.location.pathname;
+      if (!currentPath.includes('/sign-in') && !currentPath.includes('/sign-up') && currentPath !== '/') {
+        navigate("/", { replace: true });
+      }
+    }
+  }, [navigate, authError, workspaceError]);
 
   const permissions = usePermissions(user, workspace);
 

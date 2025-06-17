@@ -6,8 +6,14 @@ import UserModel from "../models/user.model";
 
 const isAuthenticatedJWT = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    // Get token from cookie
-    const token = req.cookies.authToken;
+    let token = req.cookies.authToken;
+    
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+      }
+    }
     
     if (!token) {
       res.status(HTTPSTATUS.UNAUTHORIZED).json({
@@ -17,10 +23,8 @@ const isAuthenticatedJWT = async (req: Request, res: Response, next: NextFunctio
       return;
     }
 
-    // Verify token
     const decoded = jwt.verify(token, config.JWT_SECRET) as { userId: string };
     
-    // Get user from database
     const user = await UserModel.findById(decoded.userId).populate('currentWorkspace');
     
     if (!user) {
@@ -31,7 +35,6 @@ const isAuthenticatedJWT = async (req: Request, res: Response, next: NextFunctio
       return;
     }
 
-    // Attach user to request
     req.user = user;
     next();
   } catch (error) {
