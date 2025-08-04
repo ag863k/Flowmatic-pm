@@ -160,9 +160,21 @@ const SignIn = () => {
                         type="submit"
                         className="w-full"
                       >
-                        {isPending && <Loader className="animate-spin" />}
-                        Login
+                        {isPending ? (
+                          <>
+                            <Loader className="mr-2 h-4 w-4 animate-spin" />
+                            <span>Signing in...</span>
+                          </>
+                        ) : (
+                          "Login"
+                        )}
                       </Button>
+                      {isPending && (
+                        <div className="text-center text-xs text-muted-foreground bg-muted/50 p-3 rounded-md">
+                          <p className="font-medium">Please wait, this may take up to 2 minutes</p>
+                          <p className="mt-1">Our backend is hosted on Render's free tier and may need time to start up</p>
+                        </div>
+                      )}
                     </div>
                     <div className="text-center text-sm">
                       Don&apos;t have an account?{" "}

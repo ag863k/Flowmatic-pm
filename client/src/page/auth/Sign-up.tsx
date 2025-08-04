@@ -62,11 +62,12 @@ const SignUp = () => {
           title: "Success",
           description: "Account created successfully!",
         });
-        
+
         if (user?.currentWorkspace) {
-          const workspaceId = typeof user.currentWorkspace === 'string' 
-            ? user.currentWorkspace 
-            : (user.currentWorkspace as { _id: string })._id;
+          const workspaceId =
+            typeof user.currentWorkspace === "string"
+              ? user.currentWorkspace
+              : (user.currentWorkspace as { _id: string })._id;
           navigate(`/workspace/${workspaceId}`);
         } else {
           // Fallback to sign-in page if no workspace
@@ -185,9 +186,21 @@ const SignUp = () => {
                         disabled={isPending}
                         className="w-full"
                       >
-                        {isPending && <Loader className="animate-spin" />}
-                        Sign up
+                        {isPending ? (
+                          <>
+                            <Loader className="mr-2 h-4 w-4 animate-spin" />
+                            <span>Creating account...</span>
+                          </>
+                        ) : (
+                          "Sign Up"
+                        )}
                       </Button>
+                      {isPending && (
+                        <div className="text-center text-xs text-muted-foreground bg-muted/50 p-3 rounded-md">
+                          <p className="font-medium">Please wait, this may take up to 2 minutes</p>
+                          <p className="mt-1">Our backend is hosted on Render's free tier and may need time to start up</p>
+                        </div>
+                      )}
                     </div>
                     <div className="text-center text-sm">
                       Already have an account?{" "}
@@ -202,7 +215,8 @@ const SignUp = () => {
           </Card>
           <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary  ">
             By clicking continue, you agree to our{" "}
-            <Link to="/legal/terms">Terms of Service</Link> and <Link to="/legal/privacy">Privacy Policy</Link>.
+            <Link to="/legal/terms">Terms of Service</Link> and{" "}
+            <Link to="/legal/privacy">Privacy Policy</Link>.
           </div>
         </div>
       </div>

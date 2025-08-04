@@ -6,7 +6,7 @@ const appConfig = () => ({
   BASE_PATH: getEnv("BASE_PATH", "/api"),
   MONGO_URI: getEnv("MONGO_URI", ""),
 
-  SESSION_SECRET: getEnv("SESSION_SECRET"), // Only for OAuth flow
+  SESSION_SECRET: getEnv("SESSION_SECRET"),
   JWT_SECRET: getEnv("JWT_SECRET"),
 
   GOOGLE_CLIENT_ID: getEnv("GOOGLE_CLIENT_ID"),

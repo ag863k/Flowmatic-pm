@@ -1,11 +1,10 @@
+# Dependencies
 node_modules
-.pnp
-.pnp.js
-
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
+# Logs
 logs
 *.log
 npm-debug.log*
@@ -14,46 +13,48 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Testing
 /coverage
-.nyc_output
 
+# Production builds
 /build
 /dist
 dist-ssr
-*.local
 
+# Environment variables - SECURITY CRITICAL
 .env
 .env.local
 .env.development
 .env.test
 .env.production
 .env.staging
-.env.example.filled
+.env.*.local
+*.env
+.envrc
 
+# API keys and secrets
+src/config/keys.js
+src/config/secrets.json
+public/config.js
+
+# Cache
 .cache
 .parcel-cache
 .eslintcache
 .stylelintcache
 
+# Vite
 .vite
-vite.config.js.timestamp-*
-vite.config.ts.timestamp-*
 
+# TypeScript
 *.tsbuildinfo
-.tsbuildinfo
 
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
-
+# Optional npm cache
 .npm
 
+# Editor files
 .vscode/*
 !.vscode/extensions.json
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
 .idea
 *.suo
 *.ntvs*
@@ -61,9 +62,8 @@ vite.config.ts.timestamp-*
 *.sln
 *.sw?
 *.sublime-*
-.sublime-workspace
-.sublime-project
 
+# OS files
 .DS_Store
 .DS_Store?
 ._*
@@ -73,65 +73,41 @@ ehthumbs.db
 Thumbs.db
 Desktop.ini
 
+# Runtime data
 pids
 *.pid
 *.seed
 *.pid.lock
 
+# Temporary files
 *.tmp
 *.temp
 temp/
-.tmp/
 
-storybook-static
-
+# Testing tools
 cypress/videos
 cypress/screenshots
 playwright-report/
 test-results/
 
+# Local development
 .local/
 
-.sentryclirc
-.sentry/
-
+# Deployment
+.vercel
+.netlify/
 .firebase/
 firebase-debug.log
-firestore-debug.log
 
-.vercel
-
-.netlify/
-netlify.toml.bak
-
+# Generated files
 public/workbox-*
 public/sw.js
-public/workbox-sw.js
 sw.js
-workbox-*.js
 
-public/manifest.json.bak
-
-.analytics/
-
-stats.html
-bundle-analyzer-report.html
-
-.webpack/
-
-.turbo/
-
-.next/
-out/
-
-.nuxt/
-
+# Backup files
 *.bak
 *.backup
 *.old
 
+# Source maps (for production)
 *.map
-
-*.lock
-
-devtools/

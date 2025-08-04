@@ -70,32 +70,6 @@ app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'OK' });
 });
 
-app.get('/debug/workspace/:id/members', isAuthenticatedJWT, async (req: Request, res: Response) => {
-  try {
-    const workspaceId = req.params.id;
-    const userId = req.user?._id;
-    
-    const WorkspaceModel = require('./models/workspace.model').default;
-    const workspace = await WorkspaceModel.findById(workspaceId);
-    
-    const MemberModel = require('./models/member.model').default;
-    const member = await MemberModel.findOne({ userId, workspaceId });
-    
-    res.json({
-      workspaceId,
-      workspaceExists: !!workspace,
-      userIsMember: !!member,
-      userId,
-      member: member ? {
-        role: member.role,
-        joinedAt: member.joinedAt
-      } : null
-    });
-  } catch (error) {
-    res.status(500).json({ error: (error as Error).message });
-  }
-});
-
 // Handle preflight requests
 app.options('*', (req: Request, res: Response) => {
   res.header('Access-Control-Allow-Origin', req.headers.origin || '*');

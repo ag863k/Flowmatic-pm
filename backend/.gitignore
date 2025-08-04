@@ -1,102 +1,28 @@
+# Dependencies
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-.pnp
-.pnp.js
 
+# Package managers
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
+# Environment variables - CRITICAL SECURITY
 .env
 .env.local
 .env.development
 .env.test
 .env.production
 .env.staging
-.env.example.filled
+.env.*.local
+*.env
+.envrc
 
-build/
-dist/
-lib/
-out/
-
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-
-pids
-*.pid
-*.seed
-*.pid.lock
-
-coverage/
-*.lcov
-.nyc_output
-
-test-results/
-junit.xml
-
-build/Release
-
-jspm_packages/
-
-*.tsbuildinfo
-.tsbuildinfo
-
-.npm
-
-.eslintcache
-
-.stylelintcache
-
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
-
-.node_repl_history
-
-*.tgz
-
-.yarn-integrity
-
-.vscode/
-!.vscode/extensions.json
-.idea/
-*.swp
-*.swo
-*.sublime-*
-.sublime-workspace
-.sublime-project
-
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-Desktop.ini
-
-*.tmp
-*.temp
-temp/
-.tmp/
-
-*.db
-*.sqlite
-*.sqlite3
-data/
-mongo-data/
-dump.rdb
-
+# Secrets and credentials
 secrets/
 certs/
 *.key
@@ -106,43 +32,99 @@ certs/
 *.p12
 *.pfx
 ssl/
+config/secrets.json
+config/keys.json
+config/database.json
 
+# Build output
+build/
+dist/
+lib/
+out/
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+*.lcov
+.nyc_output
+test-results/
+
+# TypeScript
+*.tsbuildinfo
+
+# Cache
+.npm
+.eslintcache
+.stylelintcache
+.cache/
+
+# IDE files
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*.sublime-*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+data/
+mongo-data/
+dump.rdb
+
+# Upload directories
 uploads/
 public/uploads/
 files/
 media/
 
+# Session files
 sessions/
-.sessions/
 
+# Process managers
 .pm2/
 ecosystem.config.js
-pm2.config.js
 
-forever.log
-
-.cache/
+# Cache
 .sass-cache/
 
+# Serverless
 .serverless/
 
+# Local development
 .local/
 
-.dockerignore
-docker-compose.override.yml
-
+# Backup files
 *.bak
 *.backup
 *.old
 
-email-templates-compiled/
-
-swagger.json
-swagger.yaml
-
+# Debug files
 debug.log
 debug-*.log
-
-*.prof
-*.heapsnapshot
-*.cpuprofile
