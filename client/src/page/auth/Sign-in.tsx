@@ -25,6 +25,7 @@ import { useMutation } from "@tanstack/react-query";
 import { loginMutationFn } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { Loader } from "lucide-react";
+import { CustomError } from "@/types/custom-error.type";
 
 const SignIn = () => {
   const navigate = useNavigate();
@@ -70,10 +71,18 @@ const SignIn = () => {
           navigate(decodedUrl || `/dashboard`);
         }
       },
-      onError: (error) => {
+      onError: (error: CustomError) => {
+        let errorMessage = error.message;
+        
+        if (error.errorCode === "TIMEOUT_ERROR" || error.message?.includes('timeout')) {
+          errorMessage = "Request timed out. The server is starting up (can take up to 2 minutes). Please try again.";
+        } else if (error.message === "Network Error") {
+          errorMessage = "Unable to connect to server. Please check your internet connection and try again.";
+        }
+        
         toast({
           title: "Error",
-          description: error.message,
+          description: errorMessage,
           variant: "destructive",
         });
       },

@@ -11,12 +11,21 @@ export default function QueryProvider({ children }: Props) {
       queries: {
         refetchOnWindowFocus: false,
         retry: (failureCount, error) => {
-          if (failureCount < 2 && error?.message === "Network Error") {
+          if (failureCount < 3 && (error?.message === "Network Error" || error?.message?.includes("timeout"))) {
             return true;
           }
           return false;
         },
-        retryDelay: 0,
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      },
+      mutations: {
+        retry: (failureCount, error) => {
+          if (failureCount < 3 && (error?.message === "Network Error" || error?.message?.includes("timeout"))) {
+            return true;
+          }
+          return false;
+        },
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
       },
     },
   });

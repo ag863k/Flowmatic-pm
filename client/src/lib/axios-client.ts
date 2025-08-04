@@ -6,7 +6,7 @@ const baseURL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_UR
 const options = {
   baseURL,
   withCredentials: true,
-  timeout: 40000,
+  timeout: 120000, // 2 minutes timeout
 };
 
 const API = axios.create(options);
@@ -36,6 +36,16 @@ API.interceptors.response.use(
     const response = error.response || {};
     const data = response.data || {};
     const status = response.status || 500;
+
+    // Handle timeout errors specifically
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+      const customError: CustomError = {
+        ...error,
+        message: "Request timed out. The server may be starting up (this can take up to 2 minutes on first request). Please try again.",
+        errorCode: "TIMEOUT_ERROR",
+      };
+      return Promise.reject(customError);
+    }
 
     if (status === 401) {
       localStorage.removeItem('authToken');
