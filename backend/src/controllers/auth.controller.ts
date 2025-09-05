@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import { asyncHandler } from "../middlewares/asyncHandler.middleware";
 import { config } from "../config/app.config";
 import { registerSchema } from "../validation/auth.validation";
@@ -6,7 +6,6 @@ import { HTTPSTATUS } from "../config/http.config";
 import { registerUserService, verifyUserService } from "../services/auth.service";
 import UserModel from "../models/user.model";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
 
 const generateToken = (userId: string) => {
   return jwt.sign({ userId }, config.JWT_SECRET, { expiresIn: '7d' });
@@ -14,37 +13,60 @@ const generateToken = (userId: string) => {
 
 const getCookieOptions = () => ({
   httpOnly: true,
-  secure: true,
-  sameSite: 'none' as const,
+  secure: config.NODE_ENV === 'production',
+  sameSite: config.NODE_ENV === 'production' ? 'none' as const : 'lax' as const,
   maxAge: 7 * 24 * 60 * 60 * 1000,
   path: '/',
 });
 
 export const googleLoginCallback = asyncHandler(
   async (req: Request, res: Response) => {
-    const user = req.user as any;
-    
-    if (!user) {
+    try {
+      const user = req.user as any;
+      
+      if (!user) {
+        return res.redirect(
+          `${config.FRONTEND_GOOGLE_CALLBACK_URL}?status=failure&error=user_not_found`
+        );
+      }
+
+      // Get the most up-to-date user data with workspace
+      const freshUser = await UserModel.findById(user._id).populate('currentWorkspace');
+      
+      if (!freshUser) {
+        return res.redirect(
+          `${config.FRONTEND_GOOGLE_CALLBACK_URL}?status=failure&error=user_not_found`
+        );
+      }
+
+      const currentWorkspace = freshUser.currentWorkspace;
+
+      if (!currentWorkspace) {
+        return res.redirect(
+          `${config.FRONTEND_GOOGLE_CALLBACK_URL}?status=failure&error=no_workspace`
+        );
+      }
+
+      const token = generateToken((freshUser as any)._id.toString());
+      
+      // Set cookie with proper options for cross-origin
+      res.cookie('authToken', token, {
+        httpOnly: true,
+        secure: config.NODE_ENV === 'production',
+        sameSite: config.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        path: '/'
+      });
+      
+      // Also pass the token in the URL for OAuth callback to store in localStorage
       return res.redirect(
-        `${config.FRONTEND_GOOGLE_CALLBACK_URL}?status=failure&error=user_not_found`
+        `${config.FRONTEND_GOOGLE_CALLBACK_URL}?status=success&workspaceId=${(currentWorkspace as any)._id}&token=${token}`
+      );
+    } catch (error) {
+      return res.redirect(
+        `${config.FRONTEND_GOOGLE_CALLBACK_URL}?status=failure&error=server_error`
       );
     }
-
-    const currentWorkspace = user.currentWorkspace;
-
-    if (!currentWorkspace) {
-      return res.redirect(
-        `${config.FRONTEND_GOOGLE_CALLBACK_URL}?status=failure&error=no_workspace`
-      );
-    }
-
-    const token = generateToken(user._id.toString());
-    
-    res.cookie('authToken', token, getCookieOptions());
-
-    return res.redirect(
-      `${config.FRONTEND_GOOGLE_CALLBACK_URL}?status=success&workspaceId=${currentWorkspace._id}`
-    );
   }
 );
 
@@ -123,11 +145,11 @@ export const loginController = asyncHandler(
 );
 
 export const logOutController = asyncHandler(
-  async (req: Request, res: Response) => {
+  async (_req: Request, res: Response) => {
     res.clearCookie('authToken', {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none' as const,
+      secure: config.NODE_ENV === 'production',
+      sameSite: config.NODE_ENV === 'production' ? 'none' as const : 'lax' as const,
       path: '/'
     });
     

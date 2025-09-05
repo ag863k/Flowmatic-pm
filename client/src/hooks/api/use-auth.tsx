@@ -1,28 +1,26 @@
 import { getCurrentUserQueryFn } from "@/lib/api";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 const useAuth = () => {
-  const [hasToken, setHasToken] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    // Initialize after a short delay to ensure the component is mounted
+    const timer = setTimeout(() => {
+      setIsInitialized(true);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Check for localStorage token
+  const [hasToken, setHasToken] = useState(false);
 
   useEffect(() => {
     const checkToken = () => {
       const token = localStorage.getItem('authToken');
-      const newHasToken = !!token;
-      
-      if (hasToken !== newHasToken) {
-        setHasToken(newHasToken);
-        
-        if (!newHasToken) {
-          queryClient.removeQueries({ queryKey: ["authUser"] });
-        }
-      }
-      
-      if (!isInitialized) {
-        setIsInitialized(true);
-      }
+      setHasToken(!!token);
     };
 
     checkToken();
@@ -36,14 +34,14 @@ const useAuth = () => {
     return () => {
       window.removeEventListener('tokenChanged', handleTokenChange);
     };
-  }, [hasToken, isInitialized, queryClient]);
+  }, []);
 
   const query = useQuery({
     queryKey: ["authUser"],
     queryFn: getCurrentUserQueryFn,
     staleTime: 5 * 60 * 1000,
     retry: 1,
-    enabled: hasToken && isInitialized,
+    enabled: isInitialized && hasToken,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });

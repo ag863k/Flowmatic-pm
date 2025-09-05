@@ -92,7 +92,6 @@ export const getMembersInWorkspaceQueryFn = async (
     // If it's a 500 error, return empty data instead of failing
     const axiosError = error as AxiosError;
     if (axiosError?.response?.status === 500) {
-      console.warn('Failed to load workspace members, returning empty data');
       return {
         message: "Failed to load members",
         members: [],

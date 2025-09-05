@@ -3,7 +3,7 @@ import useAuth from "@/hooks/api/use-auth";
 import { Navigate, Outlet } from "react-router-dom";
 
 const ProtectedRoute = () => {
-  const { data: authData, isLoading, hasToken, isInitialized } = useAuth();
+  const { data: authData, isLoading, hasToken, isInitialized, error } = useAuth();
   const user = authData?.user;
 
   // Wait for initialization
@@ -21,8 +21,13 @@ const ProtectedRoute = () => {
     return <DashboardSkeleton />;
   }
 
-  // If we have a token and loaded, check if user exists
-  return user ? <Outlet /> : <Navigate to="/" replace />;
+  // If there's an error or no user data, redirect to login
+  if (error || !user) {
+    return <Navigate to="/" replace />;
+  }
+
+  // If we have user data, allow access
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

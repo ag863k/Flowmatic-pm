@@ -17,12 +17,16 @@ passport.use(
       scope: ["profile", "email"],
       passReqToCallback: true,
     },
-    async (req: Request, accessToken, refreshToken, profile, done) => {
+    async (_req: Request, _accessToken, _refreshToken, profile, done) => {
       try {
         const { email, sub: googleId, picture } = profile._json;
         
         if (!googleId) {
-          throw new NotFoundException("Google ID (sub) is missing");
+          return done(new Error("Google ID (sub) is missing"), false);
+        }
+
+        if (!email) {
+          return done(new Error("Email is missing from Google profile"), false);
         }
 
         const { user } = await loginOrCreateAccountService({
@@ -33,12 +37,14 @@ passport.use(
           email: email,
         });
 
-        // Populate the user with currentWorkspace before returning
-        const populatedUser = await UserModel.findById(user._id).populate('currentWorkspace');
-        
-        done(null, populatedUser || user);
+        if (!user) {
+          return done(new Error("Failed to create or find user"), false);
+        }
+
+        // Return the user directly - we'll populate in the callback
+        return done(null, user);
       } catch (error) {
-        done(error, false);
+        return done(error, false);
       }
     }
   )

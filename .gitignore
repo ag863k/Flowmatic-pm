@@ -8,7 +8,7 @@ lerna-debug.log*
 .pnp
 .pnp.js
 
-# Environment variables - NEVER commit these
+# Environment variables - SECURITY CRITICAL - NEVER COMMIT
 .env
 .env.local
 .env.development
@@ -19,8 +19,10 @@ lerna-debug.log*
 *.env
 .envrc
 
-# Secrets and API keys
+# Secrets, API keys, and certificates - SECURITY CRITICAL
 secrets/
+certs/
+ssl/
 *.key
 *.pem
 *.crt
@@ -29,11 +31,16 @@ secrets/
 *.pfx
 config/secrets.json
 config/keys.json
+config/database.json
+src/config/keys.js
+public/config.js
 
 # Build outputs
 build/
 dist/
 dist-ssr/
+lib/
+out/
 .vite/
 .cache/
 .parcel-cache/
@@ -41,6 +48,8 @@ dist-ssr/
 # Logs
 logs/
 *.log
+debug.log
+debug-*.log
 
 # Runtime data
 pids
@@ -48,10 +57,14 @@ pids
 *.seed
 *.pid.lock
 
-# Coverage
+# Coverage and testing
 coverage/
 .nyc_output/
 *.lcov
+test-results/
+cypress/videos
+cypress/screenshots
+playwright-report/
 
 # IDE files
 .vscode/
@@ -89,7 +102,7 @@ pnpm-lock.yaml
 # TypeScript
 *.tsbuildinfo
 
-# Database
+# Database files
 *.db
 *.sqlite
 *.sqlite3
@@ -97,10 +110,27 @@ data/
 mongo-data/
 dump.rdb
 
-# Development
-.local/
+# Cache
+.npm
+.sass-cache/
 .eslintcache
 .stylelintcache
+
+# Upload directories and media
+uploads/
+public/uploads/
+files/
+media/
+
+# Session files
+sessions/
+
+# Process managers
+.pm2/
+ecosystem.config.js
+
+# Development
+.local/
 
 # Deployment
 .vercel/
@@ -109,6 +139,13 @@ dump.rdb
 firebase-debug.log
 .serverless/
 
+# Generated files
+public/workbox-*
+public/sw.js
+sw.js
+*.map
+
 # Backup files
 *.bak
 *.backup
+*.old

@@ -45,18 +45,24 @@ export const loginOrCreateAccountService = async (data: {
       await account.save({ session });
 
       const workspace = new WorkspaceModel({
-        name: `My Workspace`,
-        description: `Workspace created for ${user.name}`,
+        name: `${displayName}'s Workspace`,
+        description: `Workspace created for ${displayName}`,
         owner: user._id,
       });
       await workspace.save({ session });
 
-      const ownerRole = await RoleModel.findOne({
+      let ownerRole = await RoleModel.findOne({
         name: Roles.OWNER,
       }).session(session);
 
       if (!ownerRole) {
-        throw new NotFoundException("Owner role not found");
+        // Create the owner role if it doesn't exist
+        const { RolePermissions } = await import("../utils/role-permission");
+        ownerRole = new RoleModel({
+          name: Roles.OWNER,
+          permissions: RolePermissions.OWNER,
+        });
+        await ownerRole.save({ session });
       }
 
       const member = new MemberModel({
@@ -84,10 +90,43 @@ export const loginOrCreateAccountService = async (data: {
         await account.save({ session });
       }
 
+      // Ensure existing user has a current workspace
       if (!user.currentWorkspace) {
         const userMember = await MemberModel.findOne({ userId: user._id }).session(session);
         if (userMember) {
           user.currentWorkspace = userMember.workspaceId;
+          await user.save({ session });
+        } else {
+          // Create a workspace for existing user without one
+          const workspace = new WorkspaceModel({
+            name: `${user.name}'s Workspace`,
+            description: `Workspace created for ${user.name}`,
+            owner: user._id,
+          });
+          await workspace.save({ session });
+
+          let ownerRole = await RoleModel.findOne({
+            name: Roles.OWNER,
+          }).session(session);
+
+          if (!ownerRole) {
+            const { RolePermissions } = await import("../utils/role-permission");
+            ownerRole = new RoleModel({
+              name: Roles.OWNER,
+              permissions: RolePermissions.OWNER,
+            });
+            await ownerRole.save({ session });
+          }
+
+          const member = new MemberModel({
+            userId: user._id,
+            workspaceId: workspace._id,
+            role: ownerRole._id,
+            joinedAt: new Date(),
+          });
+          await member.save({ session });
+
+          user.currentWorkspace = workspace._id as mongoose.Types.ObjectId;
           await user.save({ session });
         }
       }

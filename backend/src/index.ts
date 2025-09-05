@@ -56,9 +56,9 @@ app.use(
     name: "oauth-session",
     keys: [config.SESSION_SECRET],
     maxAge: 10 * 60 * 1000,
-    secure: true,
+    secure: config.NODE_ENV === 'production',
     httpOnly: true,
-    sameSite: 'none',
+    sameSite: config.NODE_ENV === 'production' ? 'none' : 'lax',
     signed: true,
   })
 );
@@ -66,9 +66,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get('/health', (req: Request, res: Response) => {
-  res.status(200).json({ status: 'OK' });
-});
+
 
 // Handle preflight requests
 app.options('*', (req: Request, res: Response) => {
@@ -88,6 +86,8 @@ app.get(
     });
   })
 );
+
+
 
 app.use(`${BASE_PATH}/auth`, authRoutes);
 app.use(`${BASE_PATH}/user`, isAuthenticatedJWT, userRoutes);

@@ -8,7 +8,7 @@ import {
   registerUserController,
 } from "../controllers/auth.controller";
 
-const failedUrl = `${config.FRONTEND_GOOGLE_CALLBACK_URL}?status=failure`;
+const failedUrl = `${config.FRONTEND_GOOGLE_CALLBACK_URL}?status=failure&error=auth_failed`;
 
 const authRoutes = Router();
 
@@ -20,14 +20,19 @@ authRoutes.get(
   "/google",
   passport.authenticate("google", {
     scope: ["profile", "email"],
+    accessType: 'offline',
+    prompt: 'consent'
   })
 );
 
 authRoutes.get(
   "/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: failedUrl,
-  }),
+  (req, res, next) => {
+    passport.authenticate("google", {
+      failureRedirect: failedUrl,
+      session: false
+    })(req, res, next);
+  },
   googleLoginCallback
 );
 
