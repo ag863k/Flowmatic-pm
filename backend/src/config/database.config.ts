@@ -27,15 +27,15 @@ const seedRolesIfNeeded = async () => {
 
 const connectDatabase = async () => {
   try {
-    console.log('🔄 Connecting to MongoDB...');
+    console.log('Connecting to MongoDB...');
     await mongoose.connect(config.MONGO_URI);
-    console.log('✅ MongoDB connected successfully');
+    console.log('MongoDB connected successfully');
     
-    console.log('🔄 Seeding roles if needed...');
+    console.log('Seeding roles if needed...');
     await seedRolesIfNeeded();
-    console.log('✅ Roles seeded successfully');
+    console.log('Roles seeded successfully');
   } catch (error) {
-    console.error('❌ Database connection failed:', error);
+    console.error('Database connection failed:', error);
     throw error;
   }
 };

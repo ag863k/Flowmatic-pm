@@ -8,7 +8,7 @@ $DOCKER_USERNAME = "ag9574"
 $IMAGE_NAME = "flowmatic-backend"
 $VERSION = "latest"
 
-Write-Host "🚀 Starting Flowmatic Backend Docker Deployment" -ForegroundColor Green
+Write-Host "Starting Flowmatic Backend Docker Deployment" -ForegroundColor Green
 Write-Host ""
 
 # Check if Docker is installed
@@ -17,16 +17,16 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
-Write-Host "📦 Building Docker image..." -ForegroundColor Yellow
+Write-Host "Building Docker image..." -ForegroundColor Yellow
 Set-Location backend
 
 # Build the Docker image
 docker build -t "${DOCKER_USERNAME}/${IMAGE_NAME}:${VERSION}" .
 
 if ($LASTEXITCODE -eq 0) {
-    Write-Host "✅ Docker image built successfully!" -ForegroundColor Green
+    Write-Host "SUCCESS: Docker image built successfully!" -ForegroundColor Green
 } else {
-    Write-Host "❌ Docker build failed!" -ForegroundColor Red
+    Write-Host "ERROR: Docker build failed!" -ForegroundColor Red
     exit 1
 }
 
@@ -34,42 +34,42 @@ if ($LASTEXITCODE -eq 0) {
 if (Test-Path .git) {
     $GIT_SHA = git rev-parse --short HEAD
     docker tag "${DOCKER_USERNAME}/${IMAGE_NAME}:${VERSION}" "${DOCKER_USERNAME}/${IMAGE_NAME}:${GIT_SHA}"
-    Write-Host "✅ Tagged with Git SHA: ${GIT_SHA}" -ForegroundColor Green
+    Write-Host "SUCCESS: Tagged with Git SHA: ${GIT_SHA}" -ForegroundColor Green
 }
 
 Write-Host ""
-Write-Host "🔐 Logging in to Docker Hub..." -ForegroundColor Yellow
+Write-Host "Logging in to Docker Hub..." -ForegroundColor Yellow
 Write-Host "Please enter your Docker Hub credentials when prompted."
 
 docker login
 
 if ($LASTEXITCODE -eq 0) {
-    Write-Host "✅ Logged in to Docker Hub successfully!" -ForegroundColor Green
+    Write-Host "SUCCESS: Logged in to Docker Hub successfully!" -ForegroundColor Green
 } else {
-    Write-Host "❌ Docker Hub login failed!" -ForegroundColor Red
+    Write-Host "ERROR: Docker Hub login failed!" -ForegroundColor Red
     exit 1
 }
 
 Write-Host ""
-Write-Host "⬆️  Pushing Docker image to Docker Hub..." -ForegroundColor Yellow
+Write-Host "Pushing Docker image to Docker Hub..." -ForegroundColor Yellow
 
 docker push "${DOCKER_USERNAME}/${IMAGE_NAME}:${VERSION}"
 
 if ($LASTEXITCODE -eq 0) {
-    Write-Host "✅ Image pushed successfully!" -ForegroundColor Green
+    Write-Host "SUCCESS: Image pushed successfully!" -ForegroundColor Green
 } else {
-    Write-Host "❌ Docker push failed!" -ForegroundColor Red
+    Write-Host "ERROR: Docker push failed!" -ForegroundColor Red
     exit 1
 }
 
 # Push tagged version if exists
 if ($GIT_SHA) {
     docker push "${DOCKER_USERNAME}/${IMAGE_NAME}:${GIT_SHA}"
-    Write-Host "✅ Tagged version pushed: ${GIT_SHA}" -ForegroundColor Green
+    Write-Host "SUCCESS: Tagged version pushed: ${GIT_SHA}" -ForegroundColor Green
 }
 
 Write-Host ""
-Write-Host "🎉 Deployment completed successfully!" -ForegroundColor Green
+Write-Host "Deployment completed successfully!" -ForegroundColor Green
 Write-Host ""
 Write-Host "Docker image: ${DOCKER_USERNAME}/${IMAGE_NAME}:${VERSION}"
 Write-Host ""

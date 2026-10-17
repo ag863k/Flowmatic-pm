@@ -33,11 +33,11 @@ const appConfig = () => {
   const missing = requiredVars.filter(key => !config[key as keyof typeof config]);
   
   if (missing.length > 0) {
-    console.error(`❌ Missing required environment variables: ${missing.join(', ')}`);
+    console.error(`Missing required environment variables: ${missing.join(', ')}`);
     throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
   }
 
-  console.log('✅ All required environment variables loaded');
+  console.log('All required environment variables loaded');
   
   return config;
 };

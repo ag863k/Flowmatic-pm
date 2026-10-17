@@ -21,7 +21,7 @@ const projectSchema = new Schema<ProjectDocument>(
       type: String,
       required: false,
       trim: true,
-      default: "📊",
+      default: "chart",
     },
     description: { type: String, required: false },
     workspace: {

@@ -16,25 +16,25 @@ DOCKER_USERNAME="ag9574"
 IMAGE_NAME="flowmatic-backend"
 VERSION="latest"
 
-echo -e "${GREEN}🚀 Starting Flowmatic Backend Docker Deployment${NC}"
+echo -e "${GREEN}Starting Flowmatic Backend Docker Deployment${NC}"
 echo ""
 
 # Check if Docker is installed
 if ! command -v docker &> /dev/null; then
-    echo -e "${RED}❌ Docker is not installed. Please install Docker first.${NC}"
+    echo -e "${RED}ERROR: Docker is not installed. Please install Docker first.${NC}"
     exit 1
 fi
 
-echo -e "${YELLOW}📦 Building Docker image...${NC}"
+echo -e "${YELLOW}Building Docker image...${NC}"
 cd backend
 
 # Build the Docker image
 docker build -t ${DOCKER_USERNAME}/${IMAGE_NAME}:${VERSION} .
 
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✅ Docker image built successfully!${NC}"
+    echo -e "${GREEN}SUCCESS: Docker image built successfully!${NC}"
 else
-    echo -e "${RED}❌ Docker build failed!${NC}"
+    echo -e "${RED}ERROR: Docker build failed!${NC}"
     exit 1
 fi
 
@@ -42,42 +42,42 @@ fi
 if git rev-parse --git-dir > /dev/null 2>&1; then
     GIT_SHA=$(git rev-parse --short HEAD)
     docker tag ${DOCKER_USERNAME}/${IMAGE_NAME}:${VERSION} ${DOCKER_USERNAME}/${IMAGE_NAME}:${GIT_SHA}
-    echo -e "${GREEN}✅ Tagged with Git SHA: ${GIT_SHA}${NC}"
+    echo -e "${GREEN}SUCCESS: Tagged with Git SHA: ${GIT_SHA}${NC}"
 fi
 
 echo ""
-echo -e "${YELLOW}🔐 Logging in to Docker Hub...${NC}"
+echo -e "${YELLOW}Logging in to Docker Hub...${NC}"
 echo "Please enter your Docker Hub password when prompted."
 
 docker login
 
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✅ Logged in to Docker Hub successfully!${NC}"
+    echo -e "${GREEN}SUCCESS: Logged in to Docker Hub successfully!${NC}"
 else
-    echo -e "${RED}❌ Docker Hub login failed!${NC}"
+    echo -e "${RED}ERROR: Docker Hub login failed!${NC}"
     exit 1
 fi
 
 echo ""
-echo -e "${YELLOW}⬆️  Pushing Docker image to Docker Hub...${NC}"
+echo -e "${YELLOW}Pushing Docker image to Docker Hub...${NC}"
 
 docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:${VERSION}
 
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✅ Image pushed successfully!${NC}"
+    echo -e "${GREEN}SUCCESS: Image pushed successfully!${NC}"
 else
-    echo -e "${RED}❌ Docker push failed!${NC}"
+    echo -e "${RED}ERROR: Docker push failed!${NC}"
     exit 1
 fi
 
 # Push tagged version if exists
 if [ ! -z "$GIT_SHA" ]; then
     docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:${GIT_SHA}
-    echo -e "${GREEN}✅ Tagged version pushed: ${GIT_SHA}${NC}"
+    echo -e "${GREEN}SUCCESS: Tagged version pushed: ${GIT_SHA}${NC}"
 fi
 
 echo ""
-echo -e "${GREEN}🎉 Deployment completed successfully!${NC}"
+echo -e "${GREEN}Deployment completed successfully!${NC}"
 echo ""
 echo "Docker image: ${DOCKER_USERNAME}/${IMAGE_NAME}:${VERSION}"
 echo ""

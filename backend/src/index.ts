@@ -164,32 +164,32 @@ app.use((req: Request, res: Response) => {
 app.use(errorHandler);
 
 const server = app.listen(config.PORT, async () => {
-  console.log('\n🚀 Starting Flowmatic Backend...');
-  console.log(`📍 Environment: ${config.NODE_ENV}`);
-  console.log(`📍 Port: ${config.PORT}`);
-  console.log(`📍 Base Path: ${BASE_PATH}`);
+  console.log('\nStarting Flowmatic Backend...');
+  console.log(`Environment: ${config.NODE_ENV}`);
+  console.log(`Port: ${config.PORT}`);
+  console.log(`Base Path: ${BASE_PATH}`);
   
   try {
     await connectDatabase();
-    console.log('\n✅ Server is ready and listening');
-    console.log(`🌐 Health check: http://localhost:${config.PORT}/health`);
-    console.log(`🌐 API: http://localhost:${config.PORT}${BASE_PATH}\n`);
+    console.log('\nServer is ready and listening');
+    console.log(`Health check: http://localhost:${config.PORT}/health`);
+    console.log(`API: http://localhost:${config.PORT}${BASE_PATH}\n`);
   } catch (error) {
-    console.error('\n❌ Failed to start server:', error);
+    console.error('\nFailed to start server:', error);
     process.exit(1);
   }
 });
 
 const gracefulShutdown = (signal: string) => {
-  console.log(`\n⚠️  Received ${signal}, shutting down gracefully...`);
+  console.log(`\nReceived ${signal}, shutting down gracefully...`);
   
   server.close(() => {
-    console.log('✅ Server closed');
+    console.log('Server closed');
     process.exit(0);
   });
 
   setTimeout(() => {
-    console.error('❌ Forced shutdown after timeout');
+    console.error('Forced shutdown after timeout');
     process.exit(1);
   }, 30000);
 };
@@ -198,11 +198,11 @@ process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 process.on('uncaughtException', (error) => {
-  console.error('❌ Uncaught Exception:', error);
+  console.error('Uncaught Exception:', error);
   process.exit(1);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
   process.exit(1);
 });
